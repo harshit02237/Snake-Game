@@ -45,7 +45,16 @@ score_display.hideturtle()
 score_display.color("white")
 score_display.penup()
 score_display.goto(0, 260)
-score_display.write(f"Score: {score}  High Score: {high_score}", align="center", font=("Arial", 24, "bold"))
+
+# Function to update score display
+def update_score():
+    global high_score
+    if score > high_score:
+        high_score = score  # Update high score if necessary
+    score_display.clear()
+    score_display.write(f"Score: {score}  High Score: {high_score}", align="center", font=("Arial", 24, "bold"))
+
+update_score()
 
 # Game mechanics
 direction = "stop"
@@ -95,6 +104,28 @@ def game_over():
     time.sleep(2)
     game_over_display.clear()
 
+# Reset the game
+def reset_game():
+    global score, direction
+    game_over()
+    score = 0
+    update_score()
+
+    # Move all segments off-screen
+    for segment in snake[1:]:
+        segment.goto(1000, 1000)  
+    snake.clear()
+
+    # Recreate the snake with 3 segments
+    for i in range(3):
+        segment = turtle.Turtle("square")
+        segment.color("limegreen")
+        segment.penup()
+        segment.goto(x=-20 * i, y=0)
+        snake.append(segment)
+    
+    direction = "stop"
+
 # Main game loop
 game_on = True
 while game_on:
@@ -123,37 +154,16 @@ while game_on:
 
         # Update score
         score += 10
-        if score > high_score:
-            high_score = score
-        score_display.clear()
-        score_display.write(f"Score: {score}  High Score: {high_score}", align="center", font=("Arial", 24, "bold"))
+        update_score()
 
     # Check collision with wall
     if (snake[0].xcor() > 280 or snake[0].xcor() < -280 or
         snake[0].ycor() > 280 or snake[0].ycor() < -280):
-        game_over()
-        score = 0
-        score_display.clear()
-        score_display.write(f"Score: {score}  High Score: {high_score}", align="center", font=("Arial", 24, "bold"))
-
-        # Reset the snake
-        for segment in snake[1:]:
-            segment.goto(1000, 1000)  # Move segments off-screen
-        snake = snake[:1]
-        direction = "stop"
+        reset_game()
 
     # Check collision with itself
     for segment in snake[1:]:
         if snake[0].distance(segment) < 10:
-            game_over()
-            score = 0
-            score_display.clear()
-            score_display.write(f"Score: {score}  High Score: {high_score}", align="center", font=("Arial", 24, "bold"))
-
-            # Reset the snake
-            for segment in snake[1:]:
-                segment.goto(1000, 1000)  # Move segments off-screen
-            snake = snake[:1]
-            direction = "stop"
+            reset_game()
 
 screen.mainloop()
